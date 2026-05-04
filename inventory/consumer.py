@@ -1,6 +1,8 @@
 from database import redis
 from main import Product
 import time
+from config import settings
+
 
 key = 'order_completed'
 group = 'inventory-group'

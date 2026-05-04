@@ -1,0 +1,52 @@
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  inventory:
+    build: ./inventory
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  inventory_consumer:
+    build: ./inventory
+    command: python consumer.py
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  payment:
+    build: ./payment
+    ports:
+      - "8001:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - INVENTORY_URL=http://inventory:8000
+    depends_on:
+      - redis
+      - inventory
+
+  payment_consumer:
+    build: ./payment
+    command: python consumer.py
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  notification:
+    build: ./notification
+    command: python consumer.py 
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
